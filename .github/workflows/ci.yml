@@ -41,7 +41,7 @@ jobs:
 
       - name: Run tests
         run: |
-          pytest tests/ --junitxml=test-results.xml --cov=src --cov-report=xml --cov-report=html || true
+          pytest tests/ --junitxml=test-results.xml --cov=src --cov-report=xml --cov-report=html
 
       - name: Upload test results
         uses: actions/upload-artifact@v4

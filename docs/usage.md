@@ -6,78 +6,80 @@ sailaps provides command-line utilities for managing sailing application data be
 
 ## Basic Workflow
 
-### 1. Export Data from SailWave
+### Convert SailWave JSON to Sailrace CSV
 
-Export race series data from SailWave as JSON format.
-
-### 2. Process with sailaps
+sailaps can convert exported SailWave data (JSON format) into CSV format suitable for Sailrace import.
 
 ```bash
 # Activate virtual environment
 .\.venv\Scripts\Activate.ps1
 
-# Run processing script
-python -m src.makelist
+# Run the conversion script
+python src/app.py
 ```
 
-### 3. Generate CSV for Import
+This will:
+1. Read `src/Xmas.json` (SailWave export)
+2. Extract competitor data (sailors, sail numbers, class, fleet, etc.)
+3. Filter out empty placeholder entries
+4. Generate `competitors.csv` in the project root
 
-The script generates `client_import.csv` ready for Sailrace import.
+### CSV Output Format
 
-### 4. Import into Sailrace
+The generated CSV includes the following columns:
+- **SailNo** - Sail number
+- **Class** - Boat class (e.g., Pico, Solo)
+- **Fleet** - Fleet/Division assignment
+- **Helm** - Helmsman/Sailor name
+- **PY** - Portsmouth Yardstick rating
+- **Nationality** - Competitor nationality
+- **Medical** - Medical conditions
+- **Medical Flag** - Medical flag indicator
+- **Age Group** - Age group classification
+- **Email** - Email address
+- **Sex** - Gender
+- **Photo Path** - Path to competitor photo
 
-Import the generated CSV file into Sailrace.
+### Example Output
 
-### 5. Sync Back to SailWave
-
-```bash
-# Export from Sailrace and sync changes
-python -m src.synclist
+```
+SailNo,Class,Fleet,Helm,PY,Nationality,Medical,Medical Flag,Age Group,Email,Sex,Photo Path
+7891,Pico,Small,Molly Stanbridge,,IRL,Bonkers,1,18,mmstanbridge@icloud.com,Female,\\192.168.1.23\public\Pictures\20230801_140730.jpg
+4645,SOLO,Medium,James Stanbridge,1139,GBR,Insulin Dependent Diabetic,1,Senior,jstanbridge@gmail.com,Male,\\192.168.1.23\public\Pictures\20230901_143304.jpg
 ```
 
 ## Configuration
 
-### Environment Variables
+### Input Files
 
-Configuration is managed through the `.env` file:
+- **SailWave JSON**: `src/Xmas.json` (or specify custom path)
+- Location: Must be in the `src/` directory or provide full path
 
-```env
-HUBSPOT_API_KEY=your_key_here
-LOG_LEVEL=INFO
-```
+### Output Files
 
-### Log Files
+- **Competitors CSV**: `competitors.csv` (in project root)
+- Format: UTF-8 encoded, comma-separated values
 
-Logs are stored in the `logs/` directory:
-- `logs/makelist.log` - Processing logs
-- `logs/synclist.log` - Sync operation logs
-
-## Common Tasks
-
-### View Recent Logs
-
-```bash
-# Windows
-Get-Content logs/makelist.log -Tail 20
-
-# Unix/macOS
-tail -20 logs/makelist.log
-```
-
-### Run Tests
+## Running Tests
 
 ```bash
 # Run all tests
 pytest
+
+# Run with verbose output
+pytest -v
 
 # Run with coverage report
 pytest --cov=src --cov-report=html
 
 # Run specific test file
 pytest tests/test_example.py
+
+# Run specific test class
+pytest tests/test_example.py::TestJsonToCsvConversion
 ```
 
-### Code Quality Checks
+## Code Quality Checks
 
 ```bash
 # Format code
@@ -95,47 +97,35 @@ mypy src/
 
 ## Troubleshooting
 
-### FileNotFoundError
+### FileNotFoundError: Xmas.json
 
-**Issue:** Cannot find input Excel file
+**Issue:** Cannot find input JSON file
 
-**Solution:** Ensure Excel files are in the project root directory with correct names
-
-### API Rate Limits
-
-**Issue:** HubSpot API returns 429 (Too Many Requests)
-
-**Solution:** The application implements automatic retry logic with exponential backoff. Check `logs/` for detailed error information.
+**Solution:** 
+1. Ensure `Xmas.json` is in the `src/` directory
+2. The script uses relative paths - run from project root
 
 ### CSV Import Errors
 
 **Issue:** Sailrace rejects the generated CSV
 
 **Solution:**
-1. Check the CSV file format in `client_import.csv`
-2. Review logs in `logs/makelist.log`
-3. Verify data compatibility
+1. Check the CSV file format in `competitors.csv`
+2. Verify column headers match expected format
+3. Check for special characters in data
 
-## Advanced Usage
+### Empty CSV Output
 
-### Custom CSV Export
+**Issue:** CSV has only headers, no data rows
 
-Modify the export format by editing the relevant function in `src/makelist.py`.
-
-### Batch Processing
-
-For processing multiple files:
-
-```bash
-# Process all Excel files in a directory
-for file in *.xlsx; do
-    python -m src.makelist "$file"
-done
-```
+**Solution:**
+1. Verify input JSON has competitors with `compsailno` field
+2. The script filters out empty placeholder entries
+3. Check JSON structure with a JSON viewer
 
 ## Support
 
 For issues or questions:
-1. Check the logs in `logs/` directory
+1. Check the logs if available
 2. Review [API Reference](./api.md)
 3. File an issue on GitHub

@@ -2,149 +2,125 @@
 
 This page documents the public API for sailaps modules.
 
-## Module: makelist
+## Module: app
 
-Main module for processing sailing data and generating import files.
+Main module for converting SailWave JSON data to Sailrace CSV format.
 
 ### Functions
 
-#### `process_data(input_file: str) -> pd.DataFrame`
+#### `json_to_csv(json_file: str, csv_file: str) -> None`
 
-Process input data and prepare for export.
+Convert SailWave JSON export to Sailrace CSV format.
 
-**Parameters:**
-- `input_file` (str): Path to input Excel file
-
-**Returns:**
-- `pd.DataFrame`: Processed data ready for export
-
-**Raises:**
-- `FileNotFoundError`: If input file doesn't exist
-- `ValueError`: If data format is invalid
-
-**Example:**
-```python
-from src.makelist import process_data
-
-data = process_data('input.xlsx')
-```
-
-#### `export_csv(data: pd.DataFrame, output_file: str) -> None`
-
-Export processed data to CSV format.
+Reads a SailWave JSON export file, extracts competitor data, filters out empty placeholders, and writes valid competitors to a CSV file suitable for Sailrace import.
 
 **Parameters:**
-- `data` (pd.DataFrame): Data to export
-- `output_file` (str): Path for output CSV file
+- `json_file` (str): Path to input SailWave JSON file
+- `csv_file` (str): Path for output CSV file
 
 **Returns:**
 - `None`
 
-**Example:**
-```python
-from src.makelist import process_data, export_csv
-
-data = process_data('input.xlsx')
-export_csv(data, 'output.csv')
-```
-
-## Module: synclist
-
-Synchronization utilities for data syncing between systems.
-
-### Functions
-
-#### `sync_records(source_data: dict) -> dict`
-
-Sync records from source to destination.
-
-**Parameters:**
-- `source_data` (dict): Source data structure
-
-**Returns:**
-- `dict`: Synchronization results
-
 **Raises:**
-- `ConnectionError`: If sync service unavailable
-- `ValueError`: If data validation fails
+- `FileNotFoundError`: If JSON input file doesn't exist
+- `json.JSONDecodeError`: If JSON file is invalid
+- `IOError`: If unable to write CSV file
+
+**Filtering:**
+- Only competitors with a `compsailno` (sail number) are exported
+- Empty placeholder entries (no sail number) are automatically filtered out
+
+**CSV Columns Output:**
+1. SailNo - Sail number
+2. Class - Boat class
+3. Fleet - Fleet/Division
+4. Helm - Helmsman name
+5. PY - Portsmouth Yardstick rating
+6. Nationality - Competitor nationality
+7. Medical - Medical conditions
+8. Medical Flag - Medical flag indicator
+9. Age Group - Age group
+10. Email - Email address
+11. Sex - Gender
+12. Photo Path - Photo file path
 
 **Example:**
 ```python
-from src.synclist import sync_records
+from src.app import json_to_csv
 
-results = sync_records(source_data)
+# Convert SailWave JSON to Sailrace CSV
+json_to_csv('src/Xmas.json', 'competitors.csv')
 ```
 
-## Logging
-
-### Logger Configuration
-
-All modules use Python's standard logging:
-
-```python
-import logging
-
-logger = logging.getLogger(__name__)
-logger.info("Operation completed")
+**Usage from Command Line:**
+```bash
+# Run the main script
+python src/app.py
 ```
 
-### Log Levels
+## JSON Input Format
 
-- `DEBUG`: Detailed diagnostic information
-- `INFO`: General informational messages (default)
-- `WARNING`: Warning messages for recoverable issues
-- `ERROR`: Error messages for failures
-- `CRITICAL`: Critical errors requiring immediate attention
+Expected SailWave JSON structure:
+
+```json
+{
+  "competitors": {
+    "1": {
+      "compsailno": "7891",
+      "compclass": "Pico",
+      "compdivision": "Small",
+      "comphelmname": "Sailor Name",
+      "comprating": "",
+      "compnat": "IRL",
+      "compmedical": "",
+      "compmedicalflag": "0",
+      "comphelmagegroup": "18",
+      "comphelmemail": "sailor@example.com",
+      "comphelmsex": "Female",
+      "comphelmphoto": ""
+    }
+  }
+}
+```
 
 ## Error Handling
 
-### Custom Exceptions
-
-Exception classes provide specific error information:
+The module provides clear error messages for common issues:
 
 ```python
-from src.exceptions import DataValidationError
+from src.app import json_to_csv
 
 try:
-    process_data(invalid_file)
-except DataValidationError as e:
-    logger.error(f"Data validation failed: {e}")
+    json_to_csv('input.json', 'output.csv')
+except FileNotFoundError:
+    print("JSON file not found")
+except json.JSONDecodeError:
+    print("Invalid JSON format")
+except IOError:
+    print("Unable to write CSV file")
 ```
+
+## Performance
+
+- Processing time depends on competitor count
+- Example: 2 competitors processed in ~0.1 seconds
+- Memory efficient: processes data inline without holding large structures
 
 ## Type Hints
 
-All public functions use type hints for better IDE support:
+All functions use type hints for better IDE support:
 
 ```python
-from typing import Optional
-import pandas as pd
-
-def process_with_options(
-    data: pd.DataFrame,
-    option: Optional[str] = None
-) -> pd.DataFrame:
-    """Process data with optional parameters."""
+def json_to_csv(json_file: str, csv_file: str) -> None:
+    """Convert JSON to CSV."""
     pass
 ```
-
-## Performance Considerations
-
-### Memory Usage
-
-Large Excel files are processed in chunks to minimize memory usage.
-
-### Processing Time
-
-Processing time depends on data size:
-- Small files (<10K rows): < 1 second
-- Medium files (10K-100K rows): 1-10 seconds
-- Large files (>100K rows): 10+ seconds
 
 ## Version Compatibility
 
 - **Python**: 3.12+
-- **pandas**: 2.0+
-- **requests**: 2.28+
+- **Standard Library**: Uses only json, csv, pathlib modules
+- **No External Dependencies Required** for core functionality
 
 ## See Also
 

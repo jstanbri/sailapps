@@ -30,9 +30,13 @@ def json_to_csv(json_file, csv_file):
     # Extract header names
     headers = [col[0] for col in csv_columns]
     
-    # Extract data rows
+    # Extract data rows - only include competitors with actual data
     rows = []
     for comp_id, comp_data in competitors.items():
+        # Skip empty placeholders - only include if they have a sail number
+        if not comp_data.get('compsailno'):
+            continue
+        
         row = []
         for header, json_key in csv_columns:
             value = comp_data.get(json_key, '')
@@ -50,4 +54,13 @@ def json_to_csv(json_file, csv_file):
 
 # Usage
 if __name__ == '__main__':
-    json_to_csv('Xmas.json', 'competitors.csv')
+    from pathlib import Path
+    
+    # Get the directory where this script is located
+    script_dir = Path(__file__).parent
+    
+    # Use paths relative to the script directory
+    json_file = script_dir / 'Xmas.json'
+    csv_file = script_dir.parent / 'competitors.csv'
+    
+    json_to_csv(str(json_file), str(csv_file))
