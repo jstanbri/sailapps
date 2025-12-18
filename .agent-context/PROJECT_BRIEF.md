@@ -1,5 +1,4 @@
-# sailapps
-At our Sailing Club, we use sailwave for managing results. However there exist great mobile apps (Sailrace) that I would like to be able to use, however, they need this shim to swap data back and forth.
+# sailaps - Project Brief
 
 ## Project Overview
 
@@ -54,3 +53,10 @@ python -m venv .venv
 
 # Install dependencies
 pip install -r requirements.txt
+
+# Create .env with your HubSpot API key
+
+### Important Notes
+
+- API key is stored in `.env` (never commit this file)
+- Logs are persistent in `logs/` directory for debugging
