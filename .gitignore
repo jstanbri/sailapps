@@ -205,3 +205,8 @@ cython_debug/
 marimo/_static/
 marimo/_lsp/
 __marimo__/
+# sailapps - Data files
+# CSV export files
+*.csv
+# SailWave JSON exports
+src/Xmas.json
