@@ -60,7 +60,7 @@ if __name__ == '__main__':
     script_dir = Path(__file__).parent
     
     # Use paths relative to the script directory
-    json_file = script_dir / 'Xmas.json'
+    json_file = script_dir / 'FSC_2026.json'
     csv_file = script_dir.parent / 'competitors.csv'
     
     json_to_csv(str(json_file), str(csv_file))

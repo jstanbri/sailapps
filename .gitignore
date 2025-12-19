@@ -210,3 +210,6 @@ __marimo__/
 *.csv
 # SailWave JSON exports
 src/Xmas.json
+src/*.json
+competitors.csv
+competitors.csv
